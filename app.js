@@ -3,6 +3,7 @@ const path = require('path')
 const {open} = require('sqlite')
 const sqlite3 = require('sqlite3')
 const {format, isValid} = require('date-fns')
+const cors = require("cors")
 
 const dbPath = path.join(__dirname, 'todoApplication.db')
 
@@ -10,6 +11,7 @@ let db = null
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 
 const initializeDbandServer = async () => {
   try {
@@ -51,7 +53,7 @@ const isvalidCategory = category => {
 app.get('/todos/', async (request, response) => {
   const {status, priority, search_q = '', category} = request.query
   let getTodos = `
-  select id,todo, priority, status, category, due_date as dueDate from todo 
+  select id,todo, priority, status, category, due_date as dueDate from todo
   where todo like "%${search_q}%"
   `
   let responseMessage
@@ -94,7 +96,7 @@ app.get('/todos/', async (request, response) => {
 app.get('/todos/:todoId/', async (request, response) => {
   const {todoId} = request.params
   const getTodoId = await db.get(`
-  select id,todo, priority, status, category, due_date as dueDate from todo 
+  select id,todo, priority, status, category, due_date as dueDate from todo
   where id = ${todoId}`)
 
   response.send(getTodoId)
@@ -104,7 +106,7 @@ app.get('/agenda/', async (request, response) => {
   const {date} = request.query
   if (isValid(new Date(date))) {
     const query = `
-  select id,todo, priority, status, category, due_date as dueDate from todo 
+  select id,todo, priority, status, category, due_date as dueDate from todo
   where due_date = "${format(new Date(date), 'yyyy-MM-dd')}"`
     console.log(query)
     const getAgenda = await db.all(query)
@@ -133,9 +135,12 @@ app.post('/todos/', async (request, response) => {
     statusCode = 400
     responseMessage = 'Invalid Todo Status'
   } else {
+    const maxIdQuery = `SELECT MAX(id) as maxId FROM todo`
+    const result = await db.get(maxIdQuery)
+    const newId = (result?.maxId || 0) + 1
     await db.run(`
             insert into todo (id, todo, priority, status, category, due_date)
-            values (${id}, "${todo}", "${priority}" ,"${status}" , "${category}" ,"${format(
+            values (${newId}, "${todo}", "${priority}" ,"${status}" , "${category}" ,"${format(
               new Date(dueDate),
               'yyyy-MM-dd',
             )}" )`)

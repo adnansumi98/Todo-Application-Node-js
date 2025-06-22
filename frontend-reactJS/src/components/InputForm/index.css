@@ -1,0 +1,31 @@
+.input-form {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.input-form select{
+  width:150px;
+  margin: 5px;
+}
+
+.input-form input{
+  margin: 5px;
+  width:150px;
+}
+.input-form button{
+  width:200px;
+  margin:5px;
+  text-wrap: nowrap;
+}
+
+.input-form button:hover{
+  cursor: pointer;
+  background-color: chartreuse;
+  border: solid 2px green;
+  border-radius: 5px;
+}
+
+.todo-input-title {
+  width: 200% !important;
+}
